@@ -9,4 +9,4 @@ class HealthCheckUseCase:
 
     async def execute(self) -> dict:
         """Execute the health check."""
-        return await self.health_checker.check_health()
+        return await self.health_checker.check_db_health()

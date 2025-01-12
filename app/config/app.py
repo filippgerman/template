@@ -5,9 +5,10 @@ from pydantic_settings import BaseSettings
 
 from app.config.database import DatabaseConfig
 from app.config.environment_enum import EnvironmentEnum
+from app.config.redis import RedisConfig
 
 
-class AppConfig(BaseSettings, DatabaseConfig):
+class AppConfig(BaseSettings, DatabaseConfig, RedisConfig):
     """Configuration settings for the FastAPI application.
 
     Attributes:
