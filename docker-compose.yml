@@ -1,0 +1,58 @@
+version: "3.8"
+services:
+  app:
+    container_name: app
+    build: .
+    volumes:
+      - .:/code
+      - ./alembic/versions:/code/alembic/versions
+    ports:
+      - "${APP_PORT}:8000"
+    depends_on:
+      - db
+      # - redis
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_DB}
+    ports:
+      - ${DATABASE_PORT}:5432
+
+  # redis:
+  #   image: "redis:alpine"
+  #   ports:
+  #     - "${REDIS_PORT}:6379"
+  #
+  # celery_worker:
+  #   build: .
+  #   command: celery -A src.core.celery worker --loglevel=info
+  #   environment:
+  #     - CELERY_BROKER_URL=redis://redis:6379  # Настройка URL брокера Celery
+  #   volumes:
+  #     - .:/code
+  #   depends_on:
+  #     - app
+  #     - redis
+  #
+  # flower:
+  #   image: mher/flower:0.9.5
+  #   command: ['flower', '--broker=redis://redis:6379', '--port=5555']
+  #   volumes:
+  #     - .:/code
+  #   ports:
+  #     - "${FLOWER_PORT}:5555"
+  #   depends_on:
+  #     - redis
+  #     - celery_worker
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    driver: bridge

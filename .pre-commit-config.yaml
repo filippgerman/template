@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.9.1  # Убедитесь, что используете последнюю версию
+    hooks:
+      - id: black
+        args: ["--line-length=120"]
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.262  # Убедитесь, что используете последнюю версию
+    hooks:
+      - id: ruff
+        args: ["--fix", "--select", "F,E,W,C90", "--line-length=120"]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0  # Убедитесь, что используете последнюю версию
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--line-length", "120"]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.991  # Убедитесь, что используете последнюю версию
+    hooks:
+      - id: mypy
+        args: ["--ignore-missing-imports", "--follow-imports=skip"]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0  # Убедитесь, что используете последнюю версию
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
