@@ -1,12 +1,22 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
+import sentry_sdk
+from fastapi import FastAPI
 
 from app.application.controllers.health_check_controller import router as health_check_router
-from app.application.dependency.db_dependency import get_db_session
 from app.config.app import get_config
+from app.utils.logging_config import setup_logger
 
 config = get_config()
+setup_logger()
+
+if config.ENVIRONMENT != "LOCAL":
+    sentry_sdk.init(
+        dsn=config.SENTRY_DSN,
+        traces_sample_rate=1.0,
+    )
+
+app = FastAPI()
 
 
 @asynccontextmanager
@@ -27,7 +37,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    app.include_router(health_check_router, dependencies=[Depends(get_db_session)])
+    app.include_router(health_check_router)
 
     return app
 

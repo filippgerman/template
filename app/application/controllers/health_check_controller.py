@@ -1,34 +1,59 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.application.dependency.db_dependency import get_db_session
-from app.application.dependency.redis_dependency import get_redis_connector
+from app.application.dependency.use_cases.heakth_check import (
+    get_health_check_use_case_db,
+    get_health_check_use_case_redis,
+)
 from app.core.errors.database_error import DatabaseNotReachable
 from app.core.errors.redis_error import RedisNotReachable
 from app.core.use_cases.health_check import HealthCheckUseCase
-from app.repositories.unit_of_work import UnitOfWork
-from app.services.database_health_check_service import DatabaseHealthCheckService
-from app.services.redis_health_check_service import RedisHealthCheckService
 
-router = APIRouter()
+router = APIRouter(prefix="/health", tags=["Health Checks"])
 
 
-@router.get("/health/db")
-async def health_check_db(db_session=Depends(get_db_session)):
+@router.get(
+    "/db",
+    summary="Database Health Check",
+    description="Checks the availability of the database and returns its status.",
+    responses={
+        200: {
+            "description": "Database is reachable",
+            "content": {"application/json": {"example": {"status": "healthy"}}},
+        },
+        503: {
+            "description": "Database is unreachable",
+            "content": {"application/json": {"example": {"detail": "Database is unreachable"}}},
+        },
+    },
+)
+async def health_check_db(use_case: Annotated[HealthCheckUseCase, Depends(get_health_check_use_case_db)]):
     """Health check endpoint for the database."""
-    uow = UnitOfWork(lambda: db_session)
-    service = DatabaseHealthCheckService(uow)
-    use_case = HealthCheckUseCase(service)
     try:
         return await use_case.execute()
     except DatabaseNotReachable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
-@router.get("/health/redis")
-async def health_check_redis(redis_connector=Depends(get_redis_connector)):
+@router.get(
+    "/redis",
+    summary="Redis Health Check",
+    description="Checks the availability of the Redis instance and returns its status.",
+    responses={
+        200: {
+            "description": "Redis is reachable",
+            "content": {"application/json": {"example": {"status": "healthy"}}},
+        },
+        503: {
+            "description": "Redis is unreachable",
+            "content": {"application/json": {"example": {"detail": "Redis is unreachable"}}},
+        },
+    },
+)
+async def health_check_redis(use_case: Annotated[HealthCheckUseCase, Depends(get_health_check_use_case_redis)]):
     """Health check endpoint for Redis."""
-    service = RedisHealthCheckService(redis_connector=redis_connector)
     try:
-        return await service.check_health()
+        return await use_case.execute()
     except RedisNotReachable as e:
         raise HTTPException(status_code=503, detail=str(e))

@@ -29,3 +29,12 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run pytest with coverage
+        entry: poetry run pytest --cov=app --cov-fail-under=80
+        language: system
+        types: [python]
+        pass_filenames: false

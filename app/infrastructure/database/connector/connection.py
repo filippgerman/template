@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.orm import sessionmaker
 
 from app.infrastructure.database.async_session.interface import IAsyncSession
-from app.infrastructure.database.async_session.sqlalchemy import SQLAlchemySession
 from app.infrastructure.database.connector.interface import IDatabaseConnector
 
 
@@ -82,4 +81,4 @@ class SQLAlchemyConnector(IDatabaseConnector):
         """Get a database session."""
         session = self.session_factory()
         async with session as sess:
-            yield SQLAlchemySession(sess)
+            yield sess

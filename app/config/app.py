@@ -6,48 +6,32 @@ from pydantic_settings import BaseSettings
 from app.config.database import DatabaseConfig
 from app.config.environment_enum import EnvironmentEnum
 from app.config.redis import RedisConfig
+from app.config.sentry_config import SentryConfig
 
 
-class AppConfig(BaseSettings, DatabaseConfig, RedisConfig):
-    """Configuration settings for the FastAPI application.
+class AppConfig(BaseSettings, DatabaseConfig, RedisConfig, SentryConfig):
+    """Configuration settings for the FastAPI application."""
 
-    Attributes:
-        PROJECT_NAME (str): The name of the project.
-        APP_HOST (str): The host address for the application.
-        APP_PORT (str): The port number for the application.
-        LOG_LEVEL (str): The logging level for the application.
-        DEBUG (bool): Flag indicating if debug mode is enabled.
-        ENVIRONMENT (EnvironmentEnum): The environment in which the application is running.
+    PROJECT_NAME: str = Field(..., json_schema_extra={"env": "PROJECT_NAME"})
+    APP_VERSION: str = Field(..., json_schema_extra={"env": "APP_VERSION"})
+    APP_HOST: str = Field(..., json_schema_extra={"env": "APP_HOST"})
+    APP_PORT: str = Field(..., json_schema_extra={"env": "APP_PORT"})
 
-    """
+    LOG_LEVEL: str = Field(..., json_schema_extra={"env": "LOG_LEVEL"})
+    DEBUG: bool = Field(..., json_schema_extra={"env": "DEBUG"})
+    ENVIRONMENT: EnvironmentEnum = Field(..., json_schema_extra={"env": "ENVIRONMENT"})
 
-    PROJECT_NAME: str = Field(..., env="PROJECT_NAME")
-    APP_VERSION: str = Field(..., env="APP_VERSION")
-    APP_HOST: str = Field(..., env="APP_HOST")
-    APP_PORT: str = Field(..., env="APP_PORT")
-    LOG_LEVEL: str = Field(..., env="LOG_LEVEL")
-    DEBUG: bool = Field(..., env="DEBUG")
-    ENVIRONMENT: EnvironmentEnum = Field(..., env="ENVIRONMENT")
-
-    class Config:
-        """Configuration for Pydantic settings.
-
-        Attributes:
-            env_file (str): Path to the environment variables file.
-            case_sensitive (bool): Flag for case sensitivity.
-
-        """
-
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+    }
 
 
 @lru_cache
 def get_config() -> AppConfig:
-    """Return the application configuration loaded from environment variables.
+    """
+    Return the application configuration loaded from environment variables.
 
-    Returns:
-        AppConfig: The application configuration instance.
-
+    Automatically uses an `.env` file based on the current environment.
     """
     return AppConfig()

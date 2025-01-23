@@ -1,4 +1,9 @@
-class ServiceException(Exception):
-    """Base exception for service errors."""
+class BaseError(Exception):
+    """Base class for all application errors."""
 
-    pass
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+    def __str__(self):
+        return self.message
